@@ -1,0 +1,4 @@
+project_id = "umnjkibvrlylacmsnrcl"
+
+[functions.ai-benefits]
+verify_jwt = false
