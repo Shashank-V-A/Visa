@@ -1,6 +1,111 @@
 export type Language = "en" | "ta";
 
-export const translations = {
+export interface TranslationType {
+  nav: {
+    home: string;
+    dashboard: string;
+    benefits: string;
+    login: string;
+    signup: string;
+    logout: string;
+  };
+  landing: {
+    heroTitle: string;
+    heroTitleHighlight: string;
+    heroSubtitle: string;
+    ctaButton: string;
+    ctaSecondary: string;
+    feature1Title: string;
+    feature1Desc: string;
+    feature2Title: string;
+    feature2Desc: string;
+    feature3Title: string;
+    feature3Desc: string;
+    trustedBy: string;
+    privacyNote: string;
+  };
+  auth: {
+    loginTitle: string;
+    loginSubtitle: string;
+    signupTitle: string;
+    signupSubtitle: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    phoneLabel: string;
+    phonePlaceholder: string;
+    passwordLabel: string;
+    passwordPlaceholder: string;
+    loginButton: string;
+    signupButton: string;
+    noAccount: string;
+    hasAccount: string;
+    orContinue: string;
+  };
+  cardInput: {
+    title: string;
+    subtitle: string;
+    cardNumber: string;
+    cardPlaceholder: string;
+    expiryLabel: string;
+    expiryPlaceholder: string;
+    submitButton: string;
+    privacyDisclaimer: string;
+    validCard: string;
+    invalidCard: string;
+  };
+  dashboard: {
+    welcomeBack: string;
+    yourCard: string;
+    totalBenefits: string;
+    activeOffers: string;
+    potentialSavings: string;
+    aiRecommendation: string;
+    bestBenefitTitle: string;
+    viewAll: string;
+    activate: string;
+    activated: string;
+    learnMore: string;
+    expires: string;
+    terms: string;
+  };
+  categories: {
+    all: string;
+    travel: string;
+    dining: string;
+    shopping: string;
+    insurance: string;
+    rewards: string;
+  };
+  search: {
+    placeholder: string;
+    noResults: string;
+    tryDifferent: string;
+  };
+  notifications: {
+    newOffer: string;
+    expiringOffer: string;
+    benefitActivated: string;
+  };
+  footer: {
+    privacyPolicy: string;
+    terms: string;
+    disclaimer: string;
+    awareness: string;
+    copyright: string;
+  };
+  common: {
+    loading: string;
+    error: string;
+    retry: string;
+    back: string;
+    next: string;
+    save: string;
+    cancel: string;
+    close: string;
+  };
+}
+
+export const translations: Record<Language, TranslationType> = {
   en: {
     // Navigation
     nav: {
@@ -229,4 +334,4 @@ export const translations = {
       close: "மூடு",
     },
   },
-} as const;
+};

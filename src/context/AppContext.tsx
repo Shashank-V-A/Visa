@@ -1,9 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import { translations } from "@/i18n/translations";
+import { translations, type Language, type TranslationType } from "@/i18n/translations";
 import { type Benefit, mockBenefits } from "@/data/benefits";
-
-type Language = "en" | "ta";
-type Translations = typeof translations.en;
 
 interface User {
   email: string;
@@ -22,7 +19,7 @@ interface AppContextType {
   // Language
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: Translations;
+  t: TranslationType;
 
   // Auth
   user: User | null;
