@@ -92,7 +92,13 @@ const Landing = () => {
                   asChild
                   className="h-14 px-8 text-lg font-semibold"
                 >
-                  <Link to="/login">{t.landing.ctaSecondary}</Link>
+                  <a
+                    href="https://en.wikipedia.org/wiki/Visa_Inc."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {t.landing.ctaSecondary}
+                  </a>
                 </Button>
               </div>
 
@@ -118,8 +124,8 @@ const Landing = () => {
             >
               <div className="relative">
                 <VisaCardVisual
-                  cardNumber="4111111111111111"
-                  holderName="JOHN DOE"
+                  cardNumber="4702274271912341"
+                  holderName="Shashank VA"
                   expiry="12/26"
                   className="animate-float"
                 />

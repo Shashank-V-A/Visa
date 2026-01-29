@@ -1,10 +1,19 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { SearchX } from "lucide-react";
+import { SearchX, Loader2 } from "lucide-react";
 import { BenefitCard } from "@/components/cards/BenefitCard";
 import { useApp } from "@/context/AppContext";
 
 export const BenefitsGrid = () => {
-  const { t, filteredBenefits, searchQuery } = useApp();
+  const { t, filteredBenefits, searchQuery, isLoadingBenefits } = useApp();
+
+  if (isLoadingBenefits) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <Loader2 className="w-10 h-10 animate-spin text-muted-foreground mb-4" />
+        <p className="text-muted-foreground">{t.common.loading}</p>
+      </div>
+    );
+  }
 
   if (filteredBenefits.length === 0) {
     return (

@@ -3,21 +3,25 @@ export type BenefitCategory = "travel" | "dining" | "shopping" | "insurance" | "
 export interface Benefit {
   id: string;
   title: string;
-  titleTa: string;
   description: string;
-  descriptionTa: string;
   category: BenefitCategory;
   icon: string;
   value: string;
-  valueTa: string;
   termsUrl: string;
   expiresAt?: string;
   isActive: boolean;
   merchants?: string[];
   locationRestriction?: string;
   aiSummary?: string;
-  aiSummaryTa?: string;
   priority: number;
+  /** @deprecated English-only app; kept for DB compatibility */
+  titleTa?: string;
+  /** @deprecated English-only app; kept for DB compatibility */
+  descriptionTa?: string;
+  /** @deprecated English-only app; kept for DB compatibility */
+  valueTa?: string;
+  /** @deprecated English-only app; kept for DB compatibility */
+  aiSummaryTa?: string;
 }
 
 export const mockBenefits: Benefit[] = [

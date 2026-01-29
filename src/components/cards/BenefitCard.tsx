@@ -7,8 +7,6 @@ import {
   Shield,
   Gift,
   ChevronDown,
-  ExternalLink,
-  Check,
   Clock,
   Hotel,
   Fuel,
@@ -54,12 +52,7 @@ const categoryColors: Record<string, string> = {
 
 export const BenefitCard = ({ benefit, isRecommended = false }: BenefitCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { t, language, activatedBenefits, activateBenefit } = useApp();
-  const isActivated = activatedBenefits.has(benefit.id);
-
-  const title = language === "ta" ? benefit.titleTa : benefit.title;
-  const description = language === "ta" ? benefit.descriptionTa : benefit.description;
-  const value = language === "ta" ? benefit.valueTa : benefit.value;
+  const { t } = useApp();
 
   return (
     <motion.div
@@ -86,7 +79,7 @@ export const BenefitCard = ({ benefit, isRecommended = false }: BenefitCardProps
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2 mb-1">
-              <h3 className="font-semibold text-foreground line-clamp-2">{title}</h3>
+              <h3 className="font-semibold text-foreground line-clamp-2">{benefit.title}</h3>
             </div>
             <Badge variant="secondary" className="text-xs">
               {t.categories[benefit.category as keyof typeof t.categories]}
@@ -96,11 +89,11 @@ export const BenefitCard = ({ benefit, isRecommended = false }: BenefitCardProps
 
         {/* Value Highlight */}
         <div className="mb-4 p-3 rounded-xl bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20">
-          <p className="text-lg font-bold text-accent">{value}</p>
+          <p className="text-lg font-bold text-accent">{benefit.value}</p>
         </div>
 
         {/* Description */}
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{description}</p>
+        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{benefit.description}</p>
 
         {/* Expandable Details */}
         <AnimatePresence>
@@ -136,47 +129,18 @@ export const BenefitCard = ({ benefit, isRecommended = false }: BenefitCardProps
                     </span>
                   </div>
                 )}
-
-                {/* Terms Link */}
-                <a
-                  href={benefit.termsUrl}
-                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                >
-                  {t.dashboard.terms}
-                  <ExternalLink className="w-3 h-3" />
-                </a>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Actions */}
-        <div className="flex items-center gap-2 mt-4">
-          <Button
-            variant={isActivated ? "secondary" : "default"}
-            size="sm"
-            className={`flex-1 ${
-              !isActivated
-                ? "bg-gradient-to-r from-accent to-accent/90 text-accent-foreground hover:opacity-90"
-                : ""
-            }`}
-            onClick={() => !isActivated && activateBenefit(benefit.id)}
-            disabled={isActivated}
-          >
-            {isActivated ? (
-              <>
-                <Check className="w-4 h-4 mr-1" />
-                {t.dashboard.activated}
-              </>
-            ) : (
-              t.dashboard.activate
-            )}
-          </Button>
+        {/* Expand / collapse details (no Activate button – benefit cards are informational only) */}
+        <div className="flex justify-end mt-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="px-3"
+            className="text-muted-foreground hover:text-foreground"
           >
             <motion.div
               animate={{ rotate: isExpanded ? 180 : 0 }}

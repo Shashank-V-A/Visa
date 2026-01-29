@@ -7,11 +7,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
 
 export const AIRecommendationCard = () => {
-  const { t, aiRecommendation, aiSummary, isLoadingAI, fetchAIRecommendation, userLocation } = useApp();
+  const { t, benefits, aiRecommendation, aiSummary, isLoadingAI, fetchAIRecommendation, userLocation } = useApp();
 
   useEffect(() => {
-    fetchAIRecommendation();
-  }, [fetchAIRecommendation]);
+    if (benefits.length > 0) fetchAIRecommendation();
+  }, [fetchAIRecommendation, benefits.length]);
 
   return (
     <motion.div

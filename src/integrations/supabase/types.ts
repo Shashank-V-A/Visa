@@ -14,7 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      countries: {
+        Row: { id: string; code: string; name_en: string; created_at: string }
+        Insert: { id?: string; code: string; name_en: string; created_at?: string }
+        Update: { id?: string; code?: string; name_en?: string; created_at?: string }
+      }
+      issuers: {
+        Row: { id: string; country_id: string; name: string; created_at: string }
+        Insert: { id?: string; country_id: string; name: string; created_at?: string }
+        Update: { id?: string; country_id?: string; name?: string; created_at?: string }
+      }
+      card_products: {
+        Row: { id: string; issuer_id: string; name: string; visa_tier: string; is_active: boolean; created_at: string; updated_at: string }
+        Insert: { id?: string; issuer_id: string; name: string; visa_tier: string; is_active?: boolean; created_at?: string; updated_at?: string }
+        Update: { id?: string; issuer_id?: string; name?: string; visa_tier?: string; is_active?: boolean; created_at?: string; updated_at?: string }
+      }
+      benefits: {
+        Row: {
+          id: string; category: string; title_en: string; title_ta: string | null; description_en: string; description_ta: string | null;
+          value_en: string; value_ta: string | null; terms_url: string | null; icon: string; is_active: boolean; priority: number;
+          valid_from: string | null; valid_until: string | null; merchants: Json; location_restriction: string | null; created_at: string; updated_at: string
+        }
+        Insert: { id?: string; category: string; title_en: string; title_ta?: string | null; description_en: string; description_ta?: string | null; value_en: string; value_ta?: string | null; terms_url?: string | null; icon?: string; is_active?: boolean; priority?: number; valid_from?: string | null; valid_until?: string | null; merchants?: Json; location_restriction?: string | null; created_at?: string; updated_at?: string }
+        Update: { [key: string]: unknown }
+      }
+      card_product_benefits: {
+        Row: { card_product_id: string; benefit_id: string; display_order: number }
+        Insert: { card_product_id: string; benefit_id: string; display_order?: number }
+        Update: { card_product_id?: string; benefit_id?: string; display_order?: number }
+      }
     }
     Views: {
       [_ in never]: never

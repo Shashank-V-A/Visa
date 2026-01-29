@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { CreditCard, Menu, X, Globe, LogOut, User } from "lucide-react";
+import { CreditCard, Menu, X, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/context/AppContext";
 
 export const Header = () => {
-  const { t, language, setLanguage, isAuthenticated, user, logout } = useApp();
+  const { t, isAuthenticated, user, logout } = useApp();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -57,19 +57,6 @@ export const Header = () => {
 
           {/* Right Section */}
           <div className="flex items-center gap-2 md:gap-4">
-            {/* Language Toggle */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setLanguage(language === "en" ? "ta" : "en")}
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <Globe className="w-4 h-4" />
-              <span className="hidden sm:inline text-xs font-medium">
-                {language === "en" ? "தமிழ்" : "English"}
-              </span>
-            </Button>
-
             {/* Auth Buttons */}
             {isAuthenticated ? (
               <div className="hidden md:flex items-center gap-2">

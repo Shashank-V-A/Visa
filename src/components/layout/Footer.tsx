@@ -1,5 +1,11 @@
-import { CreditCard, Shield, Lock } from "lucide-react";
+import { CreditCard, Shield, Lock, Linkedin, Instagram } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+
+const CONTACT_LINKS = [
+  { href: "https://www.linkedin.com/in/shashankva05", label: "LinkedIn", Icon: Linkedin },
+  { href: "https://www.instagram.com/shashank.va05", label: "Instagram", Icon: Instagram },
+  { href: "https://x.com/Shashank_VA05", label: "X", Icon: null },
+] as const;
 
 export const Footer = () => {
   const { t } = useApp();
@@ -39,16 +45,22 @@ export const Footer = () => {
             </div>
           </div>
 
-          {/* Links */}
+          {/* Contact – social links */}
           <div>
-            <h4 className="font-semibold mb-4">Legal</h4>
+            <h4 className="font-semibold mb-4">{t.footer.contact}</h4>
             <div className="space-y-2">
-              <a href="#" className="block text-sm text-primary-foreground/70 hover:text-accent transition-colors">
-                {t.footer.privacyPolicy}
-              </a>
-              <a href="#" className="block text-sm text-primary-foreground/70 hover:text-accent transition-colors">
-                {t.footer.terms}
-              </a>
+              {CONTACT_LINKS.map(({ href, label, Icon }) => (
+                <a
+                  key={href}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-accent transition-colors"
+                >
+                  {Icon ? <Icon className="w-4 h-4" /> : <span className="w-4 text-center font-bold">X</span>}
+                  {label}
+                </a>
+              ))}
             </div>
           </div>
         </div>

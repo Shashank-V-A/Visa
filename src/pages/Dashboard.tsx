@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
 import { StatsCards } from "@/components/dashboard/StatsCards";
@@ -9,7 +11,14 @@ import { VisaCardVisual } from "@/components/cards/VisaCardVisual";
 import { useApp } from "@/context/AppContext";
 
 const Dashboard = () => {
-  const { t, user, cardNumber } = useApp();
+  const { t, user, hasSelectedCard, selectedCardProduct } = useApp();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!hasSelectedCard) navigate("/card-input", { replace: true });
+  }, [hasSelectedCard, navigate]);
+
+  if (!hasSelectedCard || !selectedCardProduct) return null;
 
   return (
     <Layout>
@@ -24,7 +33,7 @@ const Dashboard = () => {
             {t.dashboard.welcomeBack}, {user?.name || "User"} 👋
           </h1>
           <p className="text-muted-foreground">
-            Explore and activate your Visa card benefits
+            Explore your Visa card benefits
           </p>
         </motion.div>
 
@@ -37,14 +46,21 @@ const Dashboard = () => {
             transition={{ delay: 0.1 }}
             className="bg-card rounded-2xl border border-border p-6"
           >
-            <h2 className="font-semibold text-lg text-foreground mb-4">
-              {t.dashboard.yourCard}
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold text-lg text-foreground">
+                {t.dashboard.yourCard}
+              </h2>
+              <Link
+                to="/card-input"
+                className="text-sm text-primary hover:underline"
+              >
+                {t.dashboard.changeCard}
+              </Link>
+            </div>
             <div className="flex justify-center">
               <VisaCardVisual
-                cardNumber={cardNumber || "4111111111111111"}
-                holderName={user?.name?.toUpperCase() || "CARD HOLDER"}
-                expiry="12/26"
+                cardProductName={selectedCardProduct.name}
+                issuerName={selectedCardProduct.issuerName}
               />
             </div>
           </motion.div>

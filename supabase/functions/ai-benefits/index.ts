@@ -1,3 +1,6 @@
+// Supabase Edge Functions run on Deno (URL imports, Deno global). IDE may use Node/TS.
+/* eslint-disable @typescript-eslint/ban-ts-comment -- Deno runtime, URL imports */
+// @ts-nocheck
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -12,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    const { benefits, location, language } = await req.json();
+    const { benefits, location } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
@@ -24,7 +27,7 @@ serve(async (req) => {
 
 Respond in JSON format with:
 - recommendedBenefitId: The ID of the best benefit
-- summary: A brief, friendly explanation (2-3 sentences) of why this benefit is recommended. ${language === "ta" ? "Respond in Tamil language." : "Respond in English."}
+- summary: A brief, friendly explanation (2-3 sentences) of why this benefit is recommended. Respond in English.
 
 Consider:
 - Location relevance (user is in ${location})

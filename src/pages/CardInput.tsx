@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Layout } from "@/components/layout/Layout";
-import { CardInputForm } from "@/components/cards/CardInputForm";
+import { CardSelectForm } from "@/components/cards/CardSelectForm";
 import { useApp } from "@/context/AppContext";
 
 const CardInput = () => {
@@ -21,9 +21,12 @@ const CardInput = () => {
             <p className="text-muted-foreground text-lg">
               {t.cardInput.subtitle}
             </p>
+            <p className="text-sm text-muted-foreground/80 mt-2">
+              {t.cardInput.noCardHint}
+            </p>
           </motion.div>
 
-          <CardInputForm />
+          <CardSelectForm />
         </div>
       </div>
     </Layout>

@@ -1,4 +1,7 @@
-project_id = "umnjkibvrlylacmsnrcl"
+project_id = "fgszudijynwszanvqskg"
 
 [functions.ai-benefits]
+verify_jwt = false
+
+[functions.visa-card-benefits]
 verify_jwt = false

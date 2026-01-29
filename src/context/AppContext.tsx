@@ -1,11 +1,49 @@
-import React, { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import { translations, type Language, type TranslationType } from "@/i18n/translations";
-import { type Benefit, mockBenefits } from "@/data/benefits";
+import React, { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
+import { translations, type TranslationType } from "@/i18n/translations";
+import { type Benefit } from "@/data/benefits";
+import { fetchBenefitsForCardProduct } from "@/lib/benefits-api";
+import { supabase } from "@/integrations/supabase/client";
+
+export interface SelectedCardProduct {
+  id: string;
+  name: string;
+  issuerName: string;
+  visaTier: string;
+}
+
+const STORAGE_KEY = "visa_selected_card";
+
+function loadSelectedCardFromStorage(): SelectedCardProduct | null {
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    if (s) {
+      const p = JSON.parse(s) as unknown;
+      if (p && typeof p === "object" && "id" in p && "name" in p) {
+        return p as SelectedCardProduct;
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function mapSupabaseUser(su: { email?: string | null; user_metadata?: Record<string, unknown> } | null): User | null {
+  if (!su?.email) return null;
+  const meta = su.user_metadata || {};
+  const name =
+    (meta.full_name as string) || (meta.name as string) || su.email.split("@")[0] || "User";
+  return {
+    email: su.email,
+    name,
+    avatar: (meta.avatar_url as string) || undefined,
+  };
+}
 
 interface User {
   email: string;
   name: string;
-  cardLast4: string;
+  avatar?: string;
 }
 
 interface Notification {
@@ -16,28 +54,24 @@ interface Notification {
 }
 
 interface AppContextType {
-  // Language
-  language: Language;
-  setLanguage: (lang: Language) => void;
   t: TranslationType;
 
-  // Auth
+  // Auth (Google OAuth only)
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   logout: () => void;
+  authError: string | null;
+  isAuthLoading: boolean;
 
-  // Card
-  cardNumber: string;
-  setCardNumber: (card: string) => void;
-  isCardValid: boolean;
-  hasEnteredCard: boolean;
+  // Card (product selection – we never store card numbers)
+  selectedCardProduct: SelectedCardProduct | null;
+  setSelectedCardProduct: (p: SelectedCardProduct | null) => void;
+  hasSelectedCard: boolean;
+  isLoadingBenefits: boolean;
 
   // Benefits
   benefits: Benefit[];
-  activatedBenefits: Set<string>;
-  activateBenefit: (id: string) => void;
   filteredBenefits: Benefit[];
   selectedCategory: string;
   setSelectedCategory: (category: string) => void;
@@ -62,21 +96,44 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Language state
-  const [language, setLanguage] = useState<Language>("en");
-  const t = translations[language];
+  const t: TranslationType = translations.en;
 
-  // Auth state
+  // Auth state (Google OAuth via Supabase)
   const [user, setUser] = useState<User | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const isAuthenticated = user !== null;
 
-  // Card state
-  const [cardNumber, setCardNumberState] = useState("");
-  const [hasEnteredCard, setHasEnteredCard] = useState(false);
+  // Supabase auth: init session and listen for changes
+  useEffect(() => {
+    setAuthError(null);
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      setIsAuthLoading(false);
+      if (error) setAuthError(error.message);
+      else setUser(mapSupabaseUser(session?.user ?? null));
+    });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(mapSupabaseUser(session?.user ?? null));
+      setAuthError(null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
-  // Benefits state
-  const [benefits] = useState<Benefit[]>(mockBenefits);
-  const [activatedBenefits, setActivatedBenefits] = useState<Set<string>>(new Set());
+  // Card state (product only; no card numbers)
+  const [selectedCardProduct, setSelectedCardProductState] = useState<SelectedCardProduct | null>(loadSelectedCardFromStorage);
+  const hasSelectedCard = selectedCardProduct !== null;
+
+  const setSelectedCardProduct = useCallback((p: SelectedCardProduct | null) => {
+    setSelectedCardProductState(p);
+    if (p) localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+    else localStorage.removeItem(STORAGE_KEY);
+  }, []);
+
+  // Benefits state (fetched from API when a card is selected)
+  const [benefits, setBenefits] = useState<Benefit[]>([]);
+  const [isLoadingBenefits, setIsLoadingBenefits] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -88,18 +145,25 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Notifications state
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  // Location state (mocked)
-  const [userLocation] = useState("Chennai, India");
+  // Location (Bangalore for location-based AI and offers)
+  const [userLocation] = useState("Bangalore, India");
 
-  // Validate Visa card number (starts with 4, 16 digits)
-  const isCardValid = /^4\d{15}$/.test(cardNumber.replace(/\s/g, ""));
-
-  const setCardNumber = useCallback((card: string) => {
-    setCardNumberState(card);
-    if (card.replace(/\s/g, "").length === 16) {
-      setHasEnteredCard(true);
+  // Fetch benefits when a card product is selected (from DB only; Visa API not used)
+  useEffect(() => {
+    if (!selectedCardProduct?.id) {
+      setBenefits([]);
+      return;
     }
-  }, []);
+    let cancelled = false;
+    setIsLoadingBenefits(true);
+    fetchBenefitsForCardProduct(selectedCardProduct.id)
+      .then((data) => {
+        if (!cancelled) setBenefits(data);
+      })
+      .catch(() => { if (!cancelled) setBenefits([]); })
+      .finally(() => { if (!cancelled) setIsLoadingBenefits(false); });
+    return () => { cancelled = true; };
+  }, [selectedCardProduct?.id]);
 
   // Filter benefits based on category and search
   const filteredBenefits = benefits.filter((benefit) => {
@@ -113,43 +177,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return matchesCategory && matchesSearch;
   });
 
-  // Auth functions
-  const login = useCallback(async (email: string, _password: string) => {
-    // Simulated login
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setUser({
-      email,
-      name: email.split("@")[0],
-      cardLast4: "4567",
+  const signInWithGoogle = useCallback(async () => {
+    setAuthError(null);
+    const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/card-input` : undefined;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo },
     });
+    if (error) setAuthError(error.message);
   }, []);
 
-  const signup = useCallback(async (email: string, _password: string, name: string) => {
-    // Simulated signup
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setUser({
-      email,
-      name,
-      cardLast4: "4567",
-    });
-  }, []);
-
-  const logout = useCallback(() => {
-    setUser(null);
-    setCardNumberState("");
-    setHasEnteredCard(false);
-    setActivatedBenefits(new Set());
-  }, []);
-
-  // Activate benefit
-  const activateBenefit = useCallback((id: string) => {
-    setActivatedBenefits((prev) => {
-      const next = new Set(prev);
-      next.add(id);
-      return next;
-    });
-    addNotification("success", t.notifications.benefitActivated);
-  }, [t]);
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
+    setSelectedCardProduct(null);
+  }, [setSelectedCardProduct]);
 
   // Fetch AI recommendation
   const fetchAIRecommendation = useCallback(async () => {
@@ -164,7 +205,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         body: JSON.stringify({
           benefits: benefits.slice(0, 5),
           location: userLocation,
-          language,
         }),
       });
 
@@ -195,7 +235,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } finally {
       setIsLoadingAI(false);
     }
-  }, [benefits, userLocation, language]);
+  }, [benefits, userLocation]);
 
   // Notifications
   const addNotification = useCallback((type: Notification["type"], message: string) => {
@@ -214,21 +254,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   return (
     <AppContext.Provider
       value={{
-        language,
-        setLanguage,
         t,
         user,
         isAuthenticated,
-        login,
-        signup,
+        signInWithGoogle,
         logout,
-        cardNumber,
-        setCardNumber,
-        isCardValid,
-        hasEnteredCard,
+        authError,
+        isAuthLoading,
+        selectedCardProduct,
+        setSelectedCardProduct,
+        hasSelectedCard,
+        isLoadingBenefits,
         benefits,
-        activatedBenefits,
-        activateBenefit,
         filteredBenefits,
         selectedCategory,
         setSelectedCategory,

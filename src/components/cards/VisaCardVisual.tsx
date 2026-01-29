@@ -2,22 +2,34 @@ import { motion } from "framer-motion";
 import { Wifi } from "lucide-react";
 
 interface VisaCardVisualProps {
+  /** Legacy: full card number (demo only). Prefer cardProductName for real flow. */
   cardNumber?: string;
   holderName?: string;
   expiry?: string;
+  /** Card product name e.g. "Regalia" or "HDFC Bank • Regalia" */
+  cardProductName?: string;
+  /** Issuer/bank name e.g. "HDFC Bank" */
+  issuerName?: string;
   className?: string;
 }
 
 export const VisaCardVisual = ({
-  cardNumber = "4XXX XXXX XXXX XXXX",
-  holderName = "CARD HOLDER",
-  expiry = "MM/YY",
+  cardNumber,
+  holderName = "Shashank VA",
+  expiry,
+  cardProductName,
+  issuerName,
   className = "",
 }: VisaCardVisualProps) => {
   const formatCardNumber = (num: string) => {
     const cleaned = num.replace(/\s/g, "").padEnd(16, "X");
     return `${cleaned.slice(0, 4)} ${cleaned.slice(4, 8)} ${cleaned.slice(8, 12)} ${cleaned.slice(12, 16)}`;
   };
+
+  const showProduct = !!cardProductName;
+  const displayHolder = showProduct ? (cardProductName.toUpperCase() || holderName) : holderName;
+  const displayNumber = showProduct ? "•••• •••• •••• ••••" : formatCardNumber(cardNumber || "4XXX XXXX XXXX XXXX");
+  const displayExpiry = expiry || (showProduct ? "" : "MM/YY");
 
   return (
     <motion.div
@@ -64,24 +76,26 @@ export const VisaCardVisual = ({
         {/* Card Number */}
         <div className="my-4">
           <p className="font-mono text-xl md:text-2xl tracking-[0.2em] text-white/90">
-            {formatCardNumber(cardNumber)}
+            {displayNumber}
           </p>
         </div>
 
         {/* Bottom Row */}
         <div className="flex justify-between items-end">
           <div>
-            <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">Card Holder</p>
+            <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">
+              {showProduct ? (issuerName || "Card") : "Card Holder"}
+            </p>
             <p className="text-sm font-medium text-white uppercase tracking-wider">
-              {holderName}
+              {displayHolder}
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">Expires</p>
-            <p className="text-sm font-medium text-white tracking-wider">
-              {expiry}
-            </p>
-          </div>
+          {displayExpiry ? (
+            <div className="text-right">
+              <p className="text-[10px] text-white/50 uppercase tracking-wider mb-1">Expires</p>
+              <p className="text-sm font-medium text-white tracking-wider">{displayExpiry}</p>
+            </div>
+          ) : null}
           {/* Visa Logo */}
           <div className="flex items-center">
             <span className="text-2xl font-bold italic text-white tracking-tighter">VISA</span>

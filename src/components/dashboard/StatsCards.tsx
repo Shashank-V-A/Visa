@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
-import { CreditCard, Gift, Sparkles, TrendingUp } from "lucide-react";
+import { Gift, Sparkles, TrendingUp } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 
 export const StatsCards = () => {
-  const { t, benefits, activatedBenefits } = useApp();
+  const { t, benefits } = useApp();
 
   const stats = [
     {
@@ -22,22 +22,15 @@ export const StatsCards = () => {
     },
     {
       label: t.dashboard.potentialSavings,
-      value: "₹12,500+",
+      value: "As per card",
       icon: TrendingUp,
       color: "text-green-600",
       bgColor: "bg-green-100 dark:bg-green-900/30",
     },
-    {
-      label: "Activated",
-      value: activatedBenefits.size.toString(),
-      icon: CreditCard,
-      color: "text-accent",
-      bgColor: "bg-accent/10",
-    },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {stats.map((stat, index) => {
         const Icon = stat.icon;
         return (

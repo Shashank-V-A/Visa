@@ -36,6 +36,31 @@ npm i
 npm run dev
 ```
 
+### Supabase + Google OAuth (required)
+
+This app uses **Supabase** for database and **Google OAuth** for sign-in (no demo or email/password).
+
+**First-time setup:** create a Supabase project and configure OAuth:
+
+1. Create a new Supabase project and add `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` to `.env`
+2. Enable Google OAuth in Supabase and add Google Cloud OAuth credentials
+3. Run the database migrations
+
+### Database migrations – required for benefits
+
+Apply the migrations so the app can load countries, issuers, card products, and benefits:
+
+```sh
+# If using Supabase CLI and a linked project:
+supabase db push
+
+# Or run the SQL in supabase/migrations/ manually in the Supabase SQL Editor:
+# 1) 20260127180000_create_benefits_schema.sql
+# 2) 20260127180100_seed_india_visa_benefits.sql
+```
+
+After that, the **Select your card** flow (Country → Bank → Card) will load real benefits from the database. No card numbers are stored; only the selected card product is persisted in `localStorage`.
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
@@ -62,7 +87,18 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Deploy on Vercel
+
+1. Push this repo to GitHub (e.g. [Visa](https://github.com/Shashank-V-A/Visa)).
+2. Go to [Vercel](https://vercel.com) and sign in with GitHub.
+3. Click **Add New** → **Project**, import the **Visa** (or this repo) repository.
+4. Leave **Framework Preset** as **Vite**. Build command: `npm run build`, output: `dist`.
+5. Add **Environment Variables** (same as `.env`; never commit real values):
+   - `VITE_SUPABASE_URL` = your Supabase project URL
+   - `VITE_SUPABASE_PUBLISHABLE_KEY` = your Supabase anon/public key
+6. Click **Deploy**. Vercel will build and host the app; future pushes to `main` auto-deploy.
+
+**Lovable:** You can also open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and use Share → Publish.
 
 ## Can I connect a custom domain to my Lovable project?
 
